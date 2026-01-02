@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+logs/
+node_modules/
+email_accounts.json
+last_index.txt
+vendoremails.csv
+
+
+
+
