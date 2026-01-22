@@ -40,19 +40,29 @@ This program sends mass emails to vendors using a rotating pool of email account
    - `WBL_EMAIL=your-wbl-email@example.com` (for API login)
    - `WBL_PASSWORD=your-wbl-password` (for API login)
 
-5. Update `email_accounts.json` with your email accounts in the format:
+5. **IMPORTANT: Generate Gmail App Passwords**
+   
+   Gmail requires App Passwords for third-party applications. For each email account:
+   
+   a. Go to https://myaccount.google.com/
+   b. Click **Security** → **2-Step Verification** (enable if not already)
+   c. Scroll down and click **App passwords**
+   d. Select **Mail** and **Other (Custom name)**
+   e. Enter "Vendor Email Bot" and click **Generate**
+   f. Copy the 16-character password (format: `xxxx xxxx xxxx xxxx`)
+   g. Use this App Password (not your regular password) in `email_accounts.json`
+
+6. Update `email_accounts.json` with your email accounts in the format:
    ```json
    [
      {
        "EMAIL_USER": "your-email@gmail.com",
-       "EMAIL_PASS": "your-app-password"
+       "EMAIL_PASS": "your-16-char-app-password"
      }
    ]
    ```
 
-6. Add vendor emails to `vendoremails.csv` (one email per row under 'email' column)
-
-7. Optionally, place your resume PDF as `Hemalatha.pdf` in the directory for attachment
+7. Add vendor emails to `vendoremails.csv` (one email per row under 'Email' column)
 
 ## Running the Program
 
@@ -66,11 +76,25 @@ python main.py
 - Logs total sent email count to WBL API job activity table
 - Creates detailed log file in `logs/` directory with timestamps and status for each email
 - Prints sending status for each email
-- Warns if PDF attachment is missing (but continues sending)
 
 ## Notes
 
 - Uses Gmail SMTP by default
 - Automatically switches accounts when limit is reached
 - Skips invalid emails
-- Resume attachment is optional
+- Includes random delays between emails (5-15 seconds) to avoid rate limiting
+
+## Troubleshooting
+
+### SMTP Error 534: "Please log in with your web browser"
+This means you're using your regular Gmail password instead of an App Password. Follow step 5 above to generate App Passwords.
+
+### SMTP Error 535: "Authentication failed"
+Your App Password is incorrect. Regenerate it and update `email_accounts.json`.
+
+### No emails being sent
+Check that:
+- Your `vendoremails.csv` has an 'Email' column (case-sensitive)
+- The `.env` file has correct SMTP settings
+- Your email accounts in `email_accounts.json` are valid
+

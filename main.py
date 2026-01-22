@@ -10,7 +10,6 @@ import time
 import random
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
 from dotenv import load_dotenv
 from datetime import datetime
 from job_activity_logger import JobActivityLogger
@@ -27,49 +26,22 @@ logging.basicConfig(
 )
 
 # Load email accounts from JSON file
-with open(os.getenv("EMAIL_ACCOUNTS_FILE"), 'r') as f:
+with open(os.getenv("EMAIL_ACCOUNTS_FILE"), 'r', encoding='utf-8') as f:
     email_accounts = json.load(f)
 
 current_account_index = 0
 emails_sent_with_current_account = 0
-MAX_EMAILS_PER_ACCOUNT = 100
+MAX_EMAILS_PER_ACCOUNT = 200
 PROGRESS_FILE = "last_index.txt"
 
 SMTP_HOST = os.getenv("SMTP_SERVER")
 SMTP_PORT = int(os.getenv("SMTP_PORT"))
-REPLY_TO_EMAIL = os.getenv("REPLY_TO_EMAIL")
 
-# Path to resume PDF
-RESUME_PATH = "Sai_madhavi.pdf"  # Place your PDF file here
 
 # Subject and Body
-subject = "AI Engineer | USC "
+subject = "AI/ML Engineer"
 
-text_body = """Hi,
 
-I’m an AI Engineer with experience building production-grade Agentic AI and RAG systems. I’ve worked on large-scale GenAI platforms with multi-agent orchestration, memory systems, secure tool use, and cloud-native deployment.
-
-Highlights:
-
-Agentic AI with LangGraph and MCP, including stateful memory and secure tool execution
-
-End-to-end RAG pipelines using Milvus, LangChain, FastAPI
-
-LLM evaluation and observability (Precision@K/Recall@K, Prometheus, Grafana)
-
-Cloud deployment on AWS (EKS, Bedrock, SageMaker) and GCP (Cloud Run, Compute Engine)
-
-MLOps, CI/CD, monitoring, and Kubernetes-based inference
-
-I’m immediately available and happy to share my resume or discuss opportunities.
-
-Best regards,
-    Sai_madhavi
-📍 Pleasanton, CA
-📧 saimadhavi.ip@gmail.com
-
-🔗 LinkedIn: https://www.linkedin.com/in/sai-madhavi/
-"""
 
 def get_next_email_account(force_switch=False):
     global current_account_index, emails_sent_with_current_account
@@ -85,23 +57,22 @@ def get_next_email_account(force_switch=False):
 def send_email(to_email):
     account = get_next_email_account()
 
+    # Get account-specific details
+    full_name = account.get("FULL_NAME", "Sender")
+    reply_to = account.get("REPLY_TO", account["EMAIL_USER"])
+    email_body = account.get("EMAIL_BODY", "")
+    
+    if not email_body:
+        logging.warning(f"No EMAIL_BODY configured for {account['EMAIL_USER']}")
+
     msg = MIMEMultipart()
     msg["Subject"] = subject
-    msg["From"] = "Sai madhavi <saimadhavi.ip@gmail.com>"
+    msg["From"] = f"{full_name}<{account['EMAIL_USER']}>"
     msg["To"] = to_email
-    msg["Reply-To"] = REPLY_TO_EMAIL
+    msg["Reply-To"] = reply_to
 
     # Attach body
-    msg.attach(MIMEText(text_body, "plain"))
-
-    # Attach resume PDF
-    if os.path.exists(RESUME_PATH):
-        with open(RESUME_PATH, "rb") as f:
-            part = MIMEApplication(f.read(), Name=os.path.basename(RESUME_PATH))
-        part['Content-Disposition'] = f'attachment; filename="{os.path.basename(RESUME_PATH)}"'
-        msg.attach(part)
-    else:
-        print(f"⚠ Resume file not found: {RESUME_PATH}")
+    msg.attach(MIMEText(email_body, "plain"))
 
     # Send the email
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
