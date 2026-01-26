@@ -40,7 +40,7 @@ SMTP_PORT = int(os.getenv("SMTP_PORT"))
 REPLY_TO_EMAIL = os.getenv("REPLY_TO_EMAIL")
 
 # Path to resume PDF
-RESUME_PATH = "Sai_madhavi.pdf"  # Place your PDF file here
+RESUME_PATH = "Resume.pdf"  # Place your PDF file here
 
 # Subject and Body
 subject = "AI Engineer | USC "
@@ -64,11 +64,11 @@ MLOps, CI/CD, monitoring, and Kubernetes-based inference
 I’m immediately available and happy to share my resume or discuss opportunities.
 
 Best regards,
-    Sai_madhavi
-📍 Pleasanton, CA
-📧 saimadhavi.ip@gmail.com
+    Candidate Name
+📍 Location
+📧 example@gmail.com
 
-🔗 LinkedIn: https://www.linkedin.com/in/sai-madhavi/
+🔗 LinkedIn: https://www.linkedin.com/in/example/
 """
 
 def get_next_email_account(force_switch=False):
@@ -87,7 +87,7 @@ def send_email(to_email):
 
     msg = MIMEMultipart()
     msg["Subject"] = subject
-    msg["From"] = "Sai madhavi <saimadhavi.ip@gmail.com>"
+    msg["From"] = "Candidate Name <example@gmail.com>"
     msg["To"] = to_email
     msg["Reply-To"] = REPLY_TO_EMAIL
 
